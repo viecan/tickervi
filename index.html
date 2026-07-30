@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Ledger — Live Large Caps &amp; Tech Forecast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F3EC;
+    --paper-raised:#FFFFFF;
+    --ink:#1B2430;
+    --ink-soft:#5B6472;
+    --rule:#D9D3C4;
+    --brand:#2B5D4F;
+    --brand-deep:#1E4238;
+    --gain:#1E7A4C;
+    --gain-bg:#E4F1E9;
+    --loss:#B23A2E;
+    --loss-bg:#FBEAE7;
+    --hold:#A87B12;
+    --hold-bg:#FBF2DF;
+    --shadow: 0 1px 0 rgba(27,36,48,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  h1,h2,h3{font-family:'Fraunces',serif;margin:0;}
+  a{color:inherit;}
+
+  /* ---------- Ticker tape ---------- */
+  .tape-wrap{
+    background:var(--ink);
+    overflow:hidden;
+    white-space:nowrap;
+    border-bottom:1px solid var(--brand-deep);
+  }
+  .tape{
+    display:inline-block;
+    padding:9px 0;
+    animation:scroll-left 60s linear infinite;
+  }
+  .tape span.sym{color:#EDE7D8;opacity:.55;font-size:12px;margin-right:6px;}
+  .tape .item{
+    display:inline-flex;
+    align-items:baseline;
+    gap:6px;
+    margin-right:28px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+  }
+  .tape .up{color:#7FD9A6;}
+  .tape .down{color:#F1978C;}
+  @keyframes scroll-left{
+    from{transform:translateX(0);}
+    to{transform:translateX(-50%);}
+  }
+
+  /* ---------- Header ---------- */
+  header.top{
+    padding:34px 28px 22px;
+    max-width:1180px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
+    border-bottom:1px solid var(--rule);
+  }
+  .brand-block .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--brand);
+    margin-bottom:6px;
+  }
+  .brand-block h1{font-size:34px;font-weight:600;color:var(--ink);}
+  .brand-block p{margin:6px 0 0;color:var(--ink-soft);font-size:14.5px;max-width:520px;}
+  .status-block{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+  .status-block .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;background:var(--rule);}
+  .status-block .dot.live{background:var(--gain);box-shadow:0 0 0 3px var(--gain-bg);}
+  .status-block .dot.busy{background:var(--hold);box-shadow:0 0 0 3px var(--hold-bg);}
+
+  /* ---------- Layout ---------- */
+  main{max-width:1180px;margin:0 auto;padding:0 28px 80px;}
+
+  /* ---------- Setup card ---------- */
+  #setup{
+    margin-top:24px;
+    background:var(--paper-raised);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:20px 24px;
+  }
+  #setup h2{font-size:18px;margin-bottom:6px;}
+  #setup p{color:var(--ink-soft);font-size:13.5px;line-height:1.55;margin:6px 0 14px;}
+  #setup p a{color:var(--brand);text-decoration:underline;}
+  .key-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .key-row input[type="text"], .key-row input[type="password"]{
+    flex:1;min-width:240px;
+    padding:10px 12px;
+    border:1px solid var(--rule);
+    border-radius:6px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    border:none;
+    border-radius:6px;
+    padding:10px 16px;
+    cursor:pointer;
+    background:var(--brand);
+    color:#fff;
+    transition:background .15s ease;
+  }
+  button:hover{background:var(--brand-deep);}
+  button.ghost{background:transparent;color:var(--brand);border:1px solid var(--brand);}
+  button.ghost:hover{background:var(--brand);color:#fff;}
+  button:disabled{opacity:.5;cursor:not-allowed;}
+  #setup.collapsed .expandable{display:none;}
+  .setup-summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+  .setup-summary small{color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;}
+
+  /* ---------- Tabs ---------- */
+  .tabs{display:flex;gap:6px;margin:32px 0 18px;border-bottom:1px solid var(--rule);}
+  .tab-btn{
+    background:transparent;color:var(--ink-soft);
+    border:none;border-bottom:2px solid transparent;
+    border-radius:0;padding:10px 4px;margin-right:22px;
+    font-family:'Fraunces',serif;font-size:16px;font-weight:600;
+  }
+  .tab-btn:hover{background:transparent;color:var(--ink);}
+  .tab-btn.active{color:var(--brand-deep);border-bottom-color:var(--brand);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* ---------- Filters ---------- */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .chip{
+    background:var(--paper-raised);
+    border:1px solid var(--rule);
+    color:var(--ink-soft);
+    padding:7px 13px;
+    border-radius:100px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+  }
+  .chip:hover{color:var(--ink);}
+  .chip.active{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+  /* ---------- Section headers ---------- */
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+  .section-head h3{font-size:18px;}
+  .section-head .sub{color:var(--ink-soft);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:26px;}
+  @media (max-width:800px){.grid-2{grid-template-columns:1fr;}}
+
+  /* ---------- Table ---------- */
+  table.ledger{width:100%;border-collapse:collapse;background:var(--paper-raised);border:1px solid var(--rule);border-radius:8px;overflow:hidden;}
+  table.ledger th{
+    text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-soft);
+    padding:10px 12px;border-bottom:1px solid var(--rule);background:#F1EDE2;
+  }
+  table.ledger td{padding:11px 12px;border-bottom:1px solid var(--rule);font-size:13.5px;}
+  table.ledger tr:last-child td{border-bottom:none;}
+  table.ledger td.num{font-family:'IBM Plex Mono',monospace;text-align:right;}
+  table.ledger td.rank{font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);width:26px;}
+  table.ledger td.sym{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+  table.ledger td.name{color:var(--ink-soft);font-size:12.5px;}
+  .chg-up{color:var(--gain);font-weight:600;}
+  .chg-down{color:var(--loss);font-weight:600;}
+  .placeholder-row td{text-align:center;color:var(--ink-soft);padding:26px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;}
+
+  /* ---------- Tech forecast cards ---------- */
+  .forecast-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;}
+  .fcard{background:var(--paper-raised);border:1px solid var(--rule);border-radius:10px;padding:18px;}
+  .fcard .row1{display:flex;justify-content:space-between;align-items:flex-start;}
+  .fcard .sym{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:16px;}
+  .fcard .company{color:var(--ink-soft);font-size:12px;margin-top:2px;}
+  .badge{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;
+    padding:4px 9px;border-radius:100px;letter-spacing:.03em;white-space:nowrap;
+  }
+  .badge.strongbuy{background:var(--gain-bg);color:var(--gain);}
+  .badge.modbuy{background:var(--hold-bg);color:var(--hold);}
+  .badge.sell{background:var(--loss-bg);color:var(--loss);}
+  .fcard .prices{display:flex;justify-content:space-between;margin-top:16px;font-family:'IBM Plex Mono',monospace;}
+  .fcard .prices .p{font-size:19px;font-weight:600;}
+  .fcard .prices .label{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+  .fcard .upside{font-family:'IBM Plex Mono',monospace;font-size:12.5px;margin-top:4px;}
+  .consensus{margin-top:14px;}
+  .consensus .bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--rule);}
+  .consensus .bar div{height:100%;}
+  .consensus .legend{display:flex;justify-content:space-between;margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink-soft);}
+
+  footer{
+    max-width:1180px;margin:40px auto 0;padding:20px 28px 40px;
+    border-top:1px solid var(--rule);color:var(--ink-soft);font-size:12px;line-height:1.6;
+  }
+  footer strong{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="tape-wrap"><div class="tape" id="tapeContent"><span class="item mono"><span class="sym">·</span>Add your Finnhub API key below to start the live ticker</span></div></div>
+
+<header class="top">
+  <div class="brand-block">
+    <div class="eyebrow">Market Ledger</div>
+    <h1>Live large caps, movers &amp; tech forecast</h1>
+    <p>Real-time quotes for US &amp; Canadian large-cap stocks, today's biggest movers, and analyst price targets for the top US tech names — all fetched live in your browser.</p>
+  </div>
+  <div class="status-block">
+    <div><span class="dot" id="statusDot"></span><span id="statusText">Not connected</span></div>
+    <div id="lastUpdated" style="margin-top:4px;">Last updated: —</div>
+  </div>
+</header>
+
+<main>
+
+  <div id="setup">
+    <div class="setup-summary" id="setupSummary">
+      <h2>Connect your data source</h2>
+      <small id="setupHint">▾ expand</small>
+    </div>
+    <div class="expandable">
+      <p>
+        This page fetches live quotes directly from <strong>Finnhub</strong> in your browser — no server involved, which is why it works fine as a static file on GitHub Pages. Get a free API key at
+        <a href="https://finnhub.io/register" target="_blank" rel="noopener">finnhub.io/register</a> (takes about a minute, no credit card), then paste it below. It's saved only in this browser's local storage.
+      </p>
+      <div class="key-row">
+        <input type="password" id="apiKeyInput" placeholder="Paste your Finnhub API key" autocomplete="off">
+        <button id="saveKeyBtn">Save &amp; load data</button>
+        <button class="ghost" id="clearKeyBtn">Clear key</button>
+      </div>
+      <p style="margin-top:12px;font-size:12px;">
+        Note: free-tier Finnhub gives real-time quotes for US exchanges; TSX (Canadian) quotes may be delayed depending on your plan. Loading respects Finnhub's free rate limit, so the first load takes roughly a minute — subsequent refreshes are quicker since company profiles are cached.
+      </p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="overview">Large Caps</button>
+    <button class="tab-btn" data-tab="movers">Movers</button>
+    <button class="tab-btn" data-tab="forecast">Tech Forecast</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="tab-panel active" id="panel-overview">
+    <div class="filters" id="capFilters">
+      <button class="chip active" data-cap="0">All tracked</button>
+      <button class="chip" data-cap="200">Mega cap · &gt;$200B</button>
+      <button class="chip" data-cap="10">Large cap · &gt;$10B</button>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-head"><h3>Top 10 · US large cap</h3><span class="sub">by market cap</span></div>
+        <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Chg %</th><th class="num">Mkt cap</th></tr></thead>
+        <tbody id="usCapTable"><tr class="placeholder-row"><td colspan="6">Connect your API key to load data</td></tr></tbody></table>
+      </div>
+      <div>
+        <div class="section-head"><h3>Top 10 · Canadian large cap</h3><span class="sub">TSX, by market cap</span></div>
+        <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Chg %</th><th class="num">Mkt cap</th></tr></thead>
+        <tbody id="caCapTable"><tr class="placeholder-row"><td colspan="6">Connect your API key to load data</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOVERS -->
+  <div class="tab-panel" id="panel-movers">
+    <div class="filters" id="moverFilters">
+      <button class="chip active" data-region="all">US + Canada</button>
+      <button class="chip" data-region="us">US only</button>
+      <button class="chip" data-region="ca">Canada only</button>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-head"><h3>Top 10 winners today</h3><span class="sub">among tracked large caps</span></div>
+        <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Chg %</th></tr></thead>
+        <tbody id="winnersTable"><tr class="placeholder-row"><td colspan="5">Connect your API key to load data</td></tr></tbody></table>
+      </div>
+      <div>
+        <div class="section-head"><h3>Top 10 losers today</h3><span class="sub">among tracked large caps</span></div>
+        <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Chg %</th></tr></thead>
+        <tbody id="losersTable"><tr class="placeholder-row"><td colspan="5">Connect your API key to load data</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORECAST -->
+  <div class="tab-panel" id="panel-forecast">
+    <div class="section-head"><h3>Top 10 US tech · analyst price targets</h3><span class="sub">consensus data, not Claude's opinion</span></div>
+    <p style="color:var(--ink-soft);font-size:13px;margin-top:-6px;margin-bottom:18px;max-width:720px;line-height:1.6;">
+      Target prices and Buy/Sell labels below come from Wall Street analyst consensus data (via Finnhub), aggregated into a simple score. This is informational only, not personalized financial advice — always do your own research before trading.
+    </p>
+    <div class="forecast-grid" id="forecastGrid">
+      <div class="placeholder-row" style="grid-column:1/-1;"><div>Connect your API key to load data</div></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div><strong>Data source:</strong> Finnhub.io, fetched live from your browser using your own free API key. Prices for US exchanges are typically real-time; other exchanges may be delayed per Finnhub's plan terms.</div>
+  <div style="margin-top:6px;"><strong>Not financial advice:</strong> Buy/Sell labels reflect an aggregation of third-party analyst ratings and price targets, not a recommendation from this tool. Markets are volatile — verify data independently before making investment decisions.</div>
+  <div style="margin-top:6px;">Built as a static page — safe to host on GitHub Pages. Your API key stays in your browser's local storage and is never sent anywhere except directly to Finnhub.</div>
+</footer>
+
+<script>
+(function(){
+
+  // ---------- Universe ----------
+  const US_LARGE_CAP = ["AAPL","MSFT","NVDA","GOOGL","AMZN","META","BRK.B","AVGO","TSLA","LLY","JPM","V","WMT","XOM","MA","UNH","JNJ","PG"];
+  const CA_LARGE_CAP = ["RY.TO","TD.TO","ENB.TO","CNQ.TO","BNS.TO","BMO.TO","CP.TO","CNR.TO","TRI.TO","SHOP.TO","SU.TO","BCE.TO","MFC.TO","TRP.TO","ATD.TO","CM.TO","WCN.TO","NTR.TO"];
+  const TECH_LIST = ["AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","AVGO","ORCL","NFLX"];
+  const ALL_SYMBOLS = Array.from(new Set([...US_LARGE_CAP, ...CA_LARGE_CAP, ...TECH_LIST]));
+
+  const PROFILE_CACHE_HOURS = 24;
+  const REFRESH_MINUTES = 3;
+
+  // ---------- State ----------
+  let apiKey = localStorage.getItem("ml_finnhub_key") || "";
+  let quotes = {};       // symbol -> {c, d, dp, t}
+  let profiles = {};     // symbol -> {name, marketCapitalization}
+  let targets = {};      // symbol -> {targetMean, targetHigh, targetLow}
+  let recs = {};         // symbol -> {strongBuy, buy, hold, sell, strongSell}
+  let capFilterMin = 0;  // in billions
+  let moverRegion = "all";
+  let queueBusy = false;
+  let refreshTimer = null;
+
+  // ---------- DOM refs ----------
+  const $ = (id) => document.getElementById(id);
+  const setupEl = $("setup");
+  const setupSummary = $("setupSummary");
+  const setupHint = $("setupHint");
+
+  setupSummary.addEventListener("click", () => {
+    setupEl.classList.toggle("collapsed");
+    setupHint.textContent = setupEl.classList.contains("collapsed") ? "▸ expand" : "▾ expand";
+  });
+
+  $("saveKeyBtn").addEventListener("click", () => {
+    const val = $("apiKeyInput").value.trim();
+    if(!val){ alert("Paste a Finnhub API key first."); return; }
+    apiKey = val;
+    localStorage.setItem("ml_finnhub_key", apiKey);
+    loadProfilesFromCache();
+    runFullLoad();
+  });
+  $("clearKeyBtn").addEventListener("click", () => {
+    localStorage.removeItem("ml_finnhub_key");
+    apiKey = "";
+    $("apiKeyInput").value = "";
+    setStatus("idle","Not connected");
+  });
+
+  // Tabs
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      $("panel-"+btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // Cap filter chips
+  document.querySelectorAll("#capFilters .chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      document.querySelectorAll("#capFilters .chip").forEach(c=>c.classList.remove("active"));
+      chip.classList.add("active");
+      capFilterMin = parseFloat(chip.dataset.cap);
+      renderOverview();
+    });
+  });
+  document.querySelectorAll("#moverFilters .chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      document.querySelectorAll("#moverFilters .chip").forEach(c=>c.classList.remove("active"));
+      chip.classList.add("active");
+      moverRegion = chip.dataset.region;
+      renderMovers();
+    });
+  });
+
+  function setStatus(state, text){
+    const dot = $("statusDot");
+    dot.className = "dot" + (state==="live" ? " live" : state==="busy" ? " busy" : "");
+    $("statusText").textContent = text;
+  }
+
+  // ---------- Rate-limited fetch queue ----------
+  const queue = [];
+  function enqueue(fn){
+    return new Promise((resolve,reject)=>{
+      queue.push({fn,resolve,reject});
+      processQueue();
+    });
+  }
+  async function processQueue(){
+    if(queueBusy) return;
+    queueBusy = true;
+    setStatus("busy","Loading…");
+    while(queue.length){
+      const job = queue.shift();
+      try{
+        const result = await job.fn();
+        job.resolve(result);
+      }catch(e){
+        job.reject(e);
+      }
+      await sleep(1100); // ~54 calls/min, under Finnhub's free 60/min cap
+    }
+    queueBusy = false;
+    setStatus("live","Live");
+    $("lastUpdated").textContent = "Last updated: " + new Date().toLocaleTimeString();
+  }
+  function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+  async function finnhubGet(path, params){
+    const url = new URL("https://finnhub.io/api/v1" + path);
+    Object.entries(params||{}).forEach(([k,v])=>url.searchParams.set(k,v));
+    url.searchParams.set("token", apiKey);
+    const res = await fetch(url.toString());
+    if(!res.ok){
+      if(res.status === 401) throw new Error("Invalid API key");
+      if(res.status === 429) throw new Error("Rate limited");
+      throw new Error("Request failed: " + res.status);
+    }
+    return res.json();
+  }
+
+  // ---------- Loading ----------
+  function loadProfilesFromCache(){
+    try{
+      const raw = localStorage.getItem("ml_profiles_cache");
+      if(!raw) return;
+      const parsed = JSON.parse(raw);
+      if(Date.now() - parsed.ts < PROFILE_CACHE_HOURS*3600*1000){
+        profiles = parsed.data;
+      }
+    }catch(e){}
+  }
+  function saveProfilesToCache(){
+    localStorage.setItem("ml_profiles_cache", JSON.stringify({ts:Date.now(), data:profiles}));
+  }
+
+  async function runFullLoad(){
+    if(!apiKey){ setStatus("idle","Not connected"); return; }
+    setupEl.classList.add("collapsed");
+    setupHint.textContent = "▸ expand";
+
+    // 1. Quotes for every tracked symbol
+    let done = 0;
+    setStatus("busy", "Loading quotes (0/"+ALL_SYMBOLS.length+")");
+    await Promise.all(ALL_SYMBOLS.map(sym => enqueue(async ()=>{
+      try{
+        const q = await finnhubGet("/quote", {symbol: sym});
+        if(q && typeof q.c === "number") quotes[sym] = q;
+      }catch(e){ console.warn("quote failed", sym, e.message); }
+      done++;
+      setStatus("busy", "Loading quotes ("+done+"/"+ALL_SYMBOLS.length+")");
+      renderTape();
+    })));
+
+    // 2. Profiles (for market cap) — only for symbols we don't already have cached
+    const capSymbols = Array.from(new Set([...US_LARGE_CAP, ...CA_LARGE_CAP]));
+    const needProfiles = capSymbols.filter(s => !profiles[s]);
+    done = 0;
+    if(needProfiles.length){
+      setStatus("busy", "Loading company profiles (0/"+needProfiles.length+")");
+      await Promise.all(needProfiles.map(sym => enqueue(async ()=>{
+        try{
+          const p = await finnhubGet("/stock/profile2", {symbol: sym});
+          if(p) profiles[sym] = p;
+        }catch(e){ console.warn("profile failed", sym, e.message); }
+        done++;
+        setStatus("busy", "Loading company profiles ("+done+"/"+needProfiles.length+")");
+      })));
+      saveProfilesToCache();
+    }
+    renderOverview();
+    renderMovers();
+
+    // 3. Price targets + recommendations for tech list
+    done = 0;
+    setStatus("busy", "Loading analyst data (0/"+TECH_LIST.length+")");
+    await Promise.all(TECH_LIST.map(sym => enqueue(async ()=>{
+      try{
+        const [t, r] = await Promise.all([
+          finnhubGet("/stock/price-target", {symbol: sym}),
+          finnhubGet("/stock/recommendation", {symbol: sym})
+        ]);
+        if(t) targets[sym] = t;
+        if(r && r.length) recs[sym] = r[0];
+      }catch(e){ console.warn("analyst data failed", sym, e.message); }
+      done++;
+      setStatus("busy", "Loading analyst data ("+done+"/"+TECH_LIST.length+")");
+      renderForecast();
+    })));
+
+    setStatus("live","Live");
+  }
+
+  // ---------- Formatting ----------
+  const fmtPrice = (v) => (v==null || isNaN(v)) ? "—" : "$"+v.toFixed(2);
+  const fmtPct = (v) => (v==null || isNaN(v)) ? "—" : (v>=0?"+":"") + v.toFixed(2) + "%";
+  const fmtCap = (m) => { // m is in millions (Finnhub returns marketCapitalization in millions)
+    if(m==null || isNaN(m)) return "—";
+    const b = m/1000;
+    if(b >= 1000) return "$"+(b/1000).toFixed(2)+"T";
+    return "$"+b.toFixed(1)+"B";
+  };
+
+  // ---------- Ticker tape ----------
+  function renderTape(){
+    const withData = ALL_SYMBOLS.filter(s=>quotes[s]);
+    if(!withData.length) return;
+    const items = withData.map(sym=>{
+      const q = quotes[sym];
+      const up = q.dp >= 0;
+      return `<span class="item"><span class="sym">${sym.replace('.TO','.TSX')}</span><span class="${up?'up':'down'}">${fmtPrice(q.c)} ${fmtPct(q.dp)}</span></span>`;
+    }).join("");
+    $("tapeContent").innerHTML = items + items; // duplicate for seamless loop
+  }
+
+  // ---------- Overview (large cap tables) ----------
+  function rankByCap(symbolList){
+    return symbolList
+      .filter(s => quotes[s] && profiles[s] && profiles[s].marketCapitalization)
+      .filter(s => (profiles[s].marketCapitalization/1000) >= capFilterMin)
+      .sort((a,b) => profiles[b].marketCapitalization - profiles[a].marketCapitalization)
+      .slice(0,10);
+  }
+
+  function renderOverview(){
+    renderCapTable("usCapTable", rankByCap(US_LARGE_CAP));
+    renderCapTable("caCapTable", rankByCap(CA_LARGE_CAP));
+  }
+
+  function renderCapTable(tbodyId, symbols){
+    const tbody = $(tbodyId);
+    if(!symbols.length){
+      tbody.innerHTML = `<tr class="placeholder-row"><td colspan="6">No data yet — still loading, or none meet this filter</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = symbols.map((sym,i)=>{
+      const q = quotes[sym], p = profiles[sym];
+      const up = q.dp >= 0;
+      return `<tr>
+        <td class="rank">${i+1}</td>
+        <td class="sym">${sym.replace('.TO','')}</td>
+        <td class="name">${p.name || sym}</td>
+        <td class="num">${fmtPrice(q.c)}</td>
+        <td class="num ${up?'chg-up':'chg-down'}">${fmtPct(q.dp)}</td>
+        <td class="num">${fmtCap(p.marketCapitalization)}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  // ---------- Movers ----------
+  function renderMovers(){
+    let pool = ALL_SYMBOLS;
+    if(moverRegion==="us") pool = US_LARGE_CAP;
+    if(moverRegion==="ca") pool = CA_LARGE_CAP;
+    const withData = pool.filter(s=>quotes[s] && typeof quotes[s].dp === "number");
+    const sorted = [...withData].sort((a,b)=> quotes[b].dp - quotes[a].dp);
+    const winners = sorted.slice(0,10);
+    const losers = sorted.slice(-10).reverse();
+    renderMoverTable("winnersTable", winners);
+    renderMoverTable("losersTable", losers);
+  }
+  function renderMoverTable(tbodyId, symbols){
+    const tbody = $(tbodyId);
+    if(!symbols.length){
+      tbody.innerHTML = `<tr class="placeholder-row"><td colspan="5">No data yet</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = symbols.map((sym,i)=>{
+      const q = quotes[sym];
+      const p = profiles[sym];
+      const up = q.dp >= 0;
+      return `<tr>
+        <td class="rank">${i+1}</td>
+        <td class="sym">${sym.replace('.TO','')}</td>
+        <td class="name">${p ? (p.name||sym) : sym}</td>
+        <td class="num">${fmtPrice(q.c)}</td>
+        <td class="num ${up?'chg-up':'chg-down'}">${fmtPct(q.dp)}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  // ---------- Forecast ----------
+  function recLabel(r){
+    if(!r) return {label:"—", cls:""};
+    const total = (r.strongBuy||0)+(r.buy||0)+(r.hold||0)+(r.sell||0)+(r.strongSell||0);
+    if(!total) return {label:"—", cls:""};
+    const score = (2*(r.strongBuy||0) + (r.buy||0) - (r.sell||0) - 2*(r.strongSell||0)) / total;
+    if(score >= 1.0) return {label:"Strong Buy", cls:"strongbuy"};
+    if(score >= 0) return {label:"Moderate Buy", cls:"modbuy"};
+    return {label:"Sell", cls:"sell"};
+  }
+
+  function renderForecast(){
+    const grid = $("forecastGrid");
+    const rows = TECH_LIST.filter(s=>quotes[s]);
+    if(!rows.length){
+      grid.innerHTML = `<div class="placeholder-row" style="grid-column:1/-1;"><div>No data yet</div></div>`;
+      return;
+    }
+    grid.innerHTML = rows.map(sym=>{
+      const q = quotes[sym];
+      const t = targets[sym];
+      const r = recs[sym];
+      const p = profiles[sym];
+      const rl = recLabel(r);
+      const targetMean = t && t.targetMean ? t.targetMean : null;
+      const upside = (targetMean && q.c) ? ((targetMean - q.c)/q.c*100) : null;
+
+      let barHtml = "";
+      let legendHtml = "";
+      if(r){
+        const total = (r.strongBuy||0)+(r.buy||0)+(r.hold||0)+(r.sell||0)+(r.strongSell||0) || 1;
+        const seg = (n,color)=> `<div style="width:${(n/total*100).toFixed(1)}%;background:${color};"></div>`;
+        barHtml = seg(r.strongBuy,"#1E7A4C")+seg(r.buy,"#6FB98F")+seg(r.hold,"#D9D3C4")+seg(r.sell,"#E8988C")+seg(r.strongSell,"#B23A2E");
+        legendHtml = `<span>${total} analysts</span><span>${r.period||''}</span>`;
+      }
+
+      return `<div class="fcard">
+        <div class="row1">
+          <div>
+            <div class="sym">${sym}</div>
+            <div class="company">${p ? (p.name||sym) : sym}</div>
+          </div>
+          <span class="badge ${rl.cls}">${rl.label}</span>
+        </div>
+        <div class="prices">
+          <div>
+            <div class="label">Current</div>
+            <div class="p">${fmtPrice(q.c)}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="label">Analyst target</div>
+            <div class="p">${targetMean ? fmtPrice(targetMean) : "—"}</div>
+          </div>
+        </div>
+        ${upside!==null ? `<div class="upside ${upside>=0?'chg-up':'chg-down'}">${upside>=0?'+':''}${upside.toFixed(1)}% to target</div>` : ""}
+        ${barHtml ? `<div class="consensus"><div class="bar">${barHtml}</div><div class="legend">${legendHtml}</div></div>` : ""}
+      </div>`;
+    }).join("");
+  }
+
+  // ---------- Boot ----------
+  if(apiKey){
+    $("apiKeyInput").value = apiKey;
+    loadProfilesFromCache();
+    runFullLoad();
+  } else {
+    setStatus("idle","Not connected");
+  }
+
+  refreshTimer = setInterval(()=>{ if(apiKey && !queueBusy) runFullLoad(); }, REFRESH_MINUTES*60*1000);
+
+})();
+</script>
+</body>
+</html>
