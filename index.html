@@ -147,6 +147,7 @@
   @media (max-width:800px){.grid-2{grid-template-columns:1fr;}}
 
   /* ---------- Table ---------- */
+  .table-scroll{overflow-x:auto;border-radius:8px;}
   table.ledger{width:100%;border-collapse:collapse;background:var(--paper-raised);border:1px solid var(--rule);border-radius:8px;overflow:hidden;}
   table.ledger th{
     text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;
@@ -159,6 +160,7 @@
   table.ledger td.rank{font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);width:26px;}
   table.ledger td.sym{font-family:'IBM Plex Mono',monospace;font-weight:600;}
   table.ledger td.name{color:var(--ink-soft);font-size:12.5px;}
+  .table-scroll table.ledger{min-width:1000px;}
   .chg-up{color:var(--gain);font-weight:600;}
   .chg-down{color:var(--loss);font-weight:600;}
   .placeholder-row td{text-align:center;color:var(--ink-soft);padding:26px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;}
@@ -234,15 +236,15 @@
   <!-- MAIN US PLAYERS -->
   <div class="tab-panel active" id="panel-us">
     <div class="section-head"><h3>Top 20 · Main US Players</h3><span class="sub">ranked live by market cap</span></div>
-    <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Market Cap</th><th class="num">Volume</th><th class="num">P/E</th><th>AI Signal</th></tr></thead>
-    <tbody id="usCapTable"><tr class="placeholder-row"><td colspan="8">Loading data…</td></tr></tbody></table>
+    <div class="table-scroll"><table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Open</th><th class="num">Prev Close</th><th class="num">Day High</th><th class="num">Day Low</th><th class="num">52W High</th><th class="num">52W Low</th><th class="num">Market Cap</th><th class="num">Volume</th><th class="num">P/E</th><th class="num">Fwd P/E</th><th class="num">Fwd EPS</th><th>AI Signal</th></tr></thead>
+    <tbody id="usCapTable"><tr class="placeholder-row"><td colspan="16">Loading data…</td></tr></tbody></table></div>
   </div>
 
   <!-- MAIN CANADIAN PLAYERS -->
   <div class="tab-panel" id="panel-ca">
     <div class="section-head"><h3>Top 20 · Main Canadian Players</h3><span class="sub">TSX, ranked live by market cap</span></div>
-    <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Market Cap</th><th class="num">Volume</th><th class="num">P/E</th><th>AI Signal</th></tr></thead>
-    <tbody id="caCapTable"><tr class="placeholder-row"><td colspan="8">Loading data…</td></tr></tbody></table>
+    <div class="table-scroll"><table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Open</th><th class="num">Prev Close</th><th class="num">Day High</th><th class="num">Day Low</th><th class="num">52W High</th><th class="num">52W Low</th><th class="num">Market Cap</th><th class="num">Volume</th><th class="num">P/E</th><th class="num">Fwd P/E</th><th class="num">Fwd EPS</th><th>AI Signal</th></tr></thead>
+    <tbody id="caCapTable"><tr class="placeholder-row"><td colspan="16">Loading data…</td></tr></tbody></table></div>
   </div>
 
   <!-- MOVERS -->
@@ -424,7 +426,15 @@
         name: r.shortName || r.longName || r.symbol,
         marketCap: r.marketCap,
         pe: r.trailingPE,
-        volume: r.regularMarketVolume
+        volume: r.regularMarketVolume,
+        open: r.regularMarketOpen,
+        prevClose: r.regularMarketPreviousClose,
+        dayHigh: r.regularMarketDayHigh,
+        dayLow: r.regularMarketDayLow,
+        yearHigh: r.fiftyTwoWeekHigh,
+        yearLow: r.fiftyTwoWeekLow,
+        forwardPE: r.forwardPE,
+        forwardEps: r.epsForward
       });
     });
     return results.length > 0;
@@ -558,7 +568,7 @@
   function renderCapTable(tbodyId, symbols){
     const tbody = $(tbodyId);
     if(!symbols.length){
-      tbody.innerHTML = `<tr class="placeholder-row"><td colspan="8">No data yet — still loading</td></tr>`;
+      tbody.innerHTML = `<tr class="placeholder-row"><td colspan="16">No data yet — still loading</td></tr>`;
       return;
     }
     tbody.innerHTML = symbols.map((sym,i)=>{
@@ -569,9 +579,17 @@
         <td class="sym">${sym}</td>
         <td class="name">${d.name || sym}</td>
         <td class="num">${fmtPrice(d.price)}</td>
+        <td class="num">${fmtPrice(d.open)}</td>
+        <td class="num">${fmtPrice(d.prevClose)}</td>
+        <td class="num">${fmtPrice(d.dayHigh)}</td>
+        <td class="num">${fmtPrice(d.dayLow)}</td>
+        <td class="num">${fmtPrice(d.yearHigh)}</td>
+        <td class="num">${fmtPrice(d.yearLow)}</td>
         <td class="num">${fmtCap(d.marketCap)}</td>
         <td class="num">${fmtVolume(d.volume)}</td>
         <td class="num">${typeof d.pe==="number" ? d.pe.toFixed(1) : "—"}</td>
+        <td class="num">${typeof d.forwardPE==="number" ? d.forwardPE.toFixed(1) : "—"}</td>
+        <td class="num">${typeof d.forwardEps==="number" ? "$"+d.forwardEps.toFixed(2) : "—"}</td>
         <td><span class="badge ${fc ? fc.cls : ''}">${fc ? fc.label : "—"}</span></td>
       </tr>`;
     }).join("");
