@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Market Ledger — Live Large Caps &amp; Tech Forecast</title>
+<title>AI Trading by Viet N. — Live Large Caps &amp; Tech Forecast</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -94,27 +94,6 @@
   main{max-width:1180px;margin:0 auto;padding:0 28px 80px;}
 
   /* ---------- Setup card ---------- */
-  #setup{
-    margin-top:24px;
-    background:var(--paper-raised);
-    border:1px solid var(--rule);
-    border-radius:10px;
-    padding:20px 24px;
-  }
-  #setup h2{font-size:18px;margin-bottom:6px;}
-  #setup p{color:var(--ink-soft);font-size:13.5px;line-height:1.55;margin:6px 0 14px;}
-  #setup p a{color:var(--brand);text-decoration:underline;}
-  .key-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-  .key-row input[type="text"], .key-row input[type="password"]{
-    flex:1;min-width:240px;
-    padding:10px 12px;
-    border:1px solid var(--rule);
-    border-radius:6px;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:13px;
-    background:var(--paper);
-    color:var(--ink);
-  }
   button{
     font-family:'Inter',sans-serif;
     font-weight:600;
@@ -131,10 +110,6 @@
   button.ghost{background:transparent;color:var(--brand);border:1px solid var(--brand);}
   button.ghost:hover{background:var(--brand);color:#fff;}
   button:disabled{opacity:.5;cursor:not-allowed;}
-  #setup.collapsed .expandable{display:none;}
-  .setup-summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
-  .setup-summary small{color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;}
-
   /* ---------- Tabs ---------- */
   .tabs{display:flex;gap:6px;margin:32px 0 18px;border-bottom:1px solid var(--rule);}
   .tab-btn{
@@ -218,42 +193,22 @@
 </head>
 <body>
 
-<div class="tape-wrap"><div class="tape" id="tapeContent"><span class="item mono"><span class="sym">·</span>Add your Finnhub API key below to start the live ticker</span></div></div>
+<div class="tape-wrap"><div class="tape" id="tapeContent"><span class="item mono"><span class="sym">·</span>Loading live market data…</span></div></div>
 
 <header class="top">
   <div class="brand-block">
-    <div class="eyebrow">Market Ledger</div>
+    <div class="eyebrow">AI Trading by Viet N.</div>
     <h1>Live large caps, movers &amp; tech forecast</h1>
-    <p>Real-time quotes for US &amp; Canadian large-cap stocks, today's biggest movers, and analyst price targets for the top US tech names — all fetched live in your browser.</p>
+    <p>Real-time quotes for US &amp; Canadian large-cap stocks, today's biggest movers, and analyst price targets for the top US tech names.</p>
   </div>
   <div class="status-block">
-    <div><span class="dot" id="statusDot"></span><span id="statusText">Not connected</span></div>
+    <div><span class="dot" id="statusDot"></span><span id="statusText">Loading…</span></div>
     <div id="lastUpdated" style="margin-top:4px;">Last updated: —</div>
+    <button class="ghost" id="refreshBtn" style="margin-top:8px;font-size:11px;padding:6px 12px;">Refresh now</button>
   </div>
 </header>
 
 <main>
-
-  <div id="setup">
-    <div class="setup-summary" id="setupSummary">
-      <h2>Connect your data source</h2>
-      <small id="setupHint">▾ expand</small>
-    </div>
-    <div class="expandable">
-      <p>
-        This page fetches live quotes directly from <strong>Finnhub</strong> in your browser — no server involved, which is why it works fine as a static file on GitHub Pages. Get a free API key at
-        <a href="https://finnhub.io/register" target="_blank" rel="noopener">finnhub.io/register</a> (takes about a minute, no credit card), then paste it below. It's saved only in this browser's local storage.
-      </p>
-      <div class="key-row">
-        <input type="password" id="apiKeyInput" placeholder="Paste your Finnhub API key" autocomplete="off">
-        <button id="saveKeyBtn">Save &amp; load data</button>
-        <button class="ghost" id="clearKeyBtn">Clear key</button>
-      </div>
-      <p style="margin-top:12px;font-size:12px;">
-        Note: free-tier Finnhub gives real-time quotes for US exchanges; TSX (Canadian) quotes may be delayed depending on your plan. Loading respects Finnhub's free rate limit, so the first load takes roughly a minute — subsequent refreshes are quicker since company profiles are cached.
-      </p>
-    </div>
-  </div>
 
   <div class="tabs">
     <button class="tab-btn active" data-tab="overview">Large Caps</button>
@@ -335,7 +290,11 @@
   const REFRESH_MINUTES = 3;
 
   // ---------- State ----------
-  let apiKey = localStorage.getItem("ml_finnhub_key") || "";
+  // Default key pre-filled for convenience. Remove DEFAULT_API_KEY (or blank it out)
+  // before publishing to a public repo if you'd rather each visitor paste their own —
+  // anyone can view this in page source once it's live.
+  const DEFAULT_API_KEY = "d9lqcthr01qhk6k5mmjgd9lqcthr01qhk6k5mmk0";
+  let apiKey = localStorage.getItem("ml_finnhub_key") || DEFAULT_API_KEY;
   let quotes = {};       // symbol -> {c, d, dp, t}
   let profiles = {};     // symbol -> {name, marketCapitalization}
   let targets = {};      // symbol -> {targetMean, targetHigh, targetLow}
@@ -347,28 +306,9 @@
 
   // ---------- DOM refs ----------
   const $ = (id) => document.getElementById(id);
-  const setupEl = $("setup");
-  const setupSummary = $("setupSummary");
-  const setupHint = $("setupHint");
 
-  setupSummary.addEventListener("click", () => {
-    setupEl.classList.toggle("collapsed");
-    setupHint.textContent = setupEl.classList.contains("collapsed") ? "▸ expand" : "▾ expand";
-  });
-
-  $("saveKeyBtn").addEventListener("click", () => {
-    const val = $("apiKeyInput").value.trim();
-    if(!val){ alert("Paste a Finnhub API key first."); return; }
-    apiKey = val;
-    localStorage.setItem("ml_finnhub_key", apiKey);
-    loadProfilesFromCache();
-    runFullLoad();
-  });
-  $("clearKeyBtn").addEventListener("click", () => {
-    localStorage.removeItem("ml_finnhub_key");
-    apiKey = "";
-    $("apiKeyInput").value = "";
-    setStatus("idle","Not connected");
+  $("refreshBtn").addEventListener("click", () => {
+    if(!queueBusy) runFullLoad();
   });
 
   // Tabs
@@ -462,9 +402,7 @@
   }
 
   async function runFullLoad(){
-    if(!apiKey){ setStatus("idle","Not connected"); return; }
-    setupEl.classList.add("collapsed");
-    setupHint.textContent = "▸ expand";
+    if(!apiKey){ setStatus("idle","No data source configured"); return; }
 
     // 1. Quotes for every tracked symbol
     let done = 0;
@@ -668,11 +606,10 @@
 
   // ---------- Boot ----------
   if(apiKey){
-    $("apiKeyInput").value = apiKey;
     loadProfilesFromCache();
     runFullLoad();
   } else {
-    setStatus("idle","Not connected");
+    setStatus("idle","No data source configured");
   }
 
   refreshTimer = setInterval(()=>{ if(apiKey && !queueBusy) runFullLoad(); }, REFRESH_MINUTES*60*1000);
