@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Trading by Viet N. — Live Large Caps &amp; Tech Forecast</title>
+<title>TICKER VI — Real-Time Market Signals for Smarter Trading</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -92,6 +92,22 @@
 
   /* ---------- Layout ---------- */
   main{max-width:1180px;margin:0 auto;padding:0 28px 80px;}
+
+  /* ---------- Search bar ---------- */
+  .search-bar-wrap{max-width:1180px;margin:20px auto 0;padding:0 28px;}
+  .search-bar{display:flex;gap:10px;}
+  .search-bar input{
+    flex:1;min-width:0;
+    padding:11px 14px;
+    border:1px solid var(--rule);
+    border-radius:6px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    background:var(--paper-raised);
+    color:var(--ink);
+  }
+  .search-bar input:focus{outline:2px solid var(--brand);outline-offset:-1px;}
+  #searchResultWrap{margin-top:14px;}
 
   /* ---------- Setup card ---------- */
   button{
@@ -193,6 +209,16 @@
     border-top:1px solid var(--rule);color:var(--ink-soft);font-size:12px;line-height:1.6;
   }
   footer strong{color:var(--ink);}
+  .footer-cta{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px;
+    padding:22px 24px;margin-bottom:22px;
+    background:var(--paper-raised);border:1px solid var(--rule);border-radius:10px;
+  }
+  .footer-cta p{margin:0;color:var(--ink);font-size:13.5px;max-width:420px;line-height:1.5;}
+  .footer-cta .cta-buttons{display:flex;gap:10px;flex-wrap:wrap;}
+  .btn-coffee{background:#3E2723;}
+  .btn-coffee:hover{background:#2A1A17;}
+  .footer-credit{font-size:12px;color:var(--ink-soft);}
 </style>
 </head>
 <body>
@@ -201,9 +227,9 @@
 
 <header class="top">
   <div class="brand-block">
-    <div class="eyebrow">AI Trading by Viet N.</div>
-    <h1>Live large caps, movers &amp; tech forecast</h1>
-    <p>Real-time quotes for US large-cap stocks, today's biggest movers, and a momentum-based price forecast for the top US tech names.</p>
+    <div class="eyebrow">TICKER VI</div>
+    <h1>Real-Time Market Signals for Smarter Trading</h1>
+    <p>Uncover top-performing stocks, biggest daily movers, and AI-powered forecasts.</p>
   </div>
   <div class="status-block">
     <div><span class="dot" id="statusDot"></span><span id="statusText">Loading…</span></div>
@@ -212,25 +238,58 @@
   </div>
 </header>
 
+<div class="search-bar-wrap">
+  <div class="search-bar">
+    <input type="text" id="tickerSearchInput" placeholder="Search any ticker — e.g. AAPL, SHOP.TO…" autocomplete="off">
+    <button id="tickerSearchBtn">Search</button>
+  </div>
+  <div id="searchResultWrap" style="display:none;"></div>
+</div>
+
 <main>
 
   <div class="tabs">
-    <button class="tab-btn active" data-tab="overview">Large Caps</button>
-    <button class="tab-btn" data-tab="movers">Movers</button>
+    <button class="tab-btn active" data-tab="us">Main US Players</button>
+    <button class="tab-btn" data-tab="ca">Main Canadian Players</button>
+    <button class="tab-btn" data-tab="movers">Daily Movers</button>
     <button class="tab-btn" data-tab="forecast">Forecast</button>
   </div>
 
-  <!-- OVERVIEW -->
-  <div class="tab-panel active" id="panel-overview">
-    <div class="filters" id="capFilters">
+  <!-- MAIN US PLAYERS -->
+  <div class="tab-panel active" id="panel-us">
+    <div class="filters" id="capFiltersUS">
       <button class="chip active" data-cap="0">All tracked</button>
       <button class="chip" data-cap="200">Mega cap · &gt;$200B</button>
       <button class="chip" data-cap="10">Large cap · &gt;$10B</button>
     </div>
-    <div>
-      <div class="section-head"><h3>Top 10 · US large cap</h3><span class="sub">by market cap</span></div>
+    <div style="margin-bottom:30px;">
+      <div class="section-head"><h3>Top 20 · US by market cap</h3><span class="sub">ranked live</span></div>
       <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Chg %</th><th class="num">Mkt cap</th><th class="num">P/E</th></tr></thead>
       <tbody id="usCapTable"><tr class="placeholder-row"><td colspan="7">Loading data…</td></tr></tbody></table>
+    </div>
+    <div>
+      <div class="section-head"><h3>Top 20 · US most active</h3><span class="sub">by trading volume today</span></div>
+      <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Chg %</th><th class="num">Volume</th></tr></thead>
+      <tbody id="usActiveTable"><tr class="placeholder-row"><td colspan="6">Loading data…</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- MAIN CANADIAN PLAYERS -->
+  <div class="tab-panel" id="panel-ca">
+    <div class="filters" id="capFiltersCA">
+      <button class="chip active" data-cap="0">All tracked</button>
+      <button class="chip" data-cap="50">Mega cap · &gt;$50B</button>
+      <button class="chip" data-cap="10">Large cap · &gt;$10B</button>
+    </div>
+    <div style="margin-bottom:30px;">
+      <div class="section-head"><h3>Top 20 · Canadian by market cap</h3><span class="sub">TSX, ranked live</span></div>
+      <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Chg %</th><th class="num">Mkt cap</th><th class="num">P/E</th></tr></thead>
+      <tbody id="caCapTable"><tr class="placeholder-row"><td colspan="7">Loading data…</td></tr></tbody></table>
+    </div>
+    <div>
+      <div class="section-head"><h3>Top 20 · Canadian most active</h3><span class="sub">by trading volume today</span></div>
+      <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Chg %</th><th class="num">Volume</th></tr></thead>
+      <tbody id="caActiveTable"><tr class="placeholder-row"><td colspan="6">Loading data…</td></tr></tbody></table>
     </div>
   </div>
 
@@ -238,12 +297,12 @@
   <div class="tab-panel" id="panel-movers">
     <div class="grid-2">
       <div>
-        <div class="section-head"><h3>Top 10 winners today</h3><span class="sub">among tracked large caps</span></div>
+        <div class="section-head"><h3>Top 10 winners today</h3><span class="sub">among tracked US large caps</span></div>
         <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Chg %</th></tr></thead>
         <tbody id="winnersTable"><tr class="placeholder-row"><td colspan="5">Loading data…</td></tr></tbody></table>
       </div>
       <div>
-        <div class="section-head"><h3>Top 10 losers today</h3><span class="sub">among tracked large caps</span></div>
+        <div class="section-head"><h3>Top 10 losers today</h3><span class="sub">among tracked US large caps</span></div>
         <table class="ledger"><thead><tr><th>#</th><th>Ticker</th><th>Company</th><th class="num">Price</th><th class="num">Chg %</th></tr></thead>
         <tbody id="losersTable"><tr class="placeholder-row"><td colspan="5">Loading data…</td></tr></tbody></table>
       </div>
@@ -252,9 +311,9 @@
 
   <!-- FORECAST -->
   <div class="tab-panel" id="panel-forecast">
-    <div class="section-head"><h3>Forecast · top 20 US large cap</h3><span class="sub">momentum-based, ranked live by market cap</span></div>
+    <div class="section-head"><h3>Forecast · top 50 US large cap</h3><span class="sub">momentum-based, ranked live by market cap</span></div>
     <p style="color:var(--ink-soft);font-size:13px;margin-top:-6px;margin-bottom:18px;max-width:720px;line-height:1.6;">
-      The 20 largest tracked stocks by market cap, each with a target price and label calculated from that stock's own recent trend — its 1-week, 3-month, and 1-year price return — blended into a single momentum score and dampened so a single hot week can't dominate the number. It's a simple, transparent heuristic, not a prediction of what will actually happen. Always do your own research before trading.
+      The 50 largest tracked stocks by market cap, each with a target price and label calculated from that stock's own recent trend — its 1-week, 3-month, and 1-year price return — blended into a single momentum score and dampened so a single hot week can't dominate the number. It's a simple, transparent heuristic, not a prediction of what will actually happen. Always do your own research before trading.
     </p>
     <div class="forecast-grid" id="forecastGrid">
       <div class="placeholder-row" style="grid-column:1/-1;"><div>Loading data…</div></div>
@@ -264,38 +323,46 @@
 </main>
 
 <footer>
-  <div><strong>Data source:</strong> Finnhub.io, fetched live from your browser. Prices for US exchanges are typically real-time.</div>
-  <div style="margin-top:6px;"><strong>Not financial advice:</strong> Forecast targets and Buy/Sell labels are generated by a simple momentum formula based on each stock's own recent price history — they are not analyst opinions, not predictions of future performance, and not personalized advice. Markets are volatile — verify data independently before making investment decisions.</div>
-  <div style="margin-top:6px;">Built as a static page — safe to host on GitHub Pages.</div>
+  <div class="footer-cta">
+    <p>Enjoying TICKER VI? Support the developer and help fund future improvements.</p>
+    <div class="cta-buttons">
+      <a href="mailto:viet.adops@gmail.com"><button class="ghost" type="button">Get in touch</button></a>
+      <a href="https://www.buymeacoffee.com/" target="_blank" rel="noopener"><button class="btn-coffee" type="button">Buy Me a Coffee ☕</button></a>
+    </div>
+  </div>
+  <div class="footer-credit">Developed by Viet. N</div>
 </footer>
 
 <script>
 (function(){
 
   // ---------- Universe ----------
-  // A broad candidate pool of US large caps — actual "top 10" / "top 20" rankings
-  // below are computed live from fetched market cap, not from this list's order.
+  // Broad candidate pools — actual rankings below are computed live from fetched
+  // market cap / volume, not from this list's order (order is only a fallback).
   const US_LARGE_CAP = [
     "AAPL","MSFT","NVDA","GOOGL","AMZN","META","BRK.B","AVGO","TSLA","LLY",
     "JPM","V","WMT","XOM","MA","UNH","JNJ","PG","ORCL","NFLX",
-    "ABBV","CVX","KO","COST","HD","BAC","ADBE","CSCO","PEP","MRK"
+    "ABBV","CVX","KO","COST","HD","BAC","ADBE","CSCO","PEP","MRK",
+    "CRM","TXN","AMD","INTU","IBM","GE","CAT","DIS","VZ","T",
+    "PM","UNP","RTX","HON","LOW","SPGI","UPS","GS","BA","AMGN",
+    "SBUX","MDT","NEE","PLD","ISRG","BLK","NOW","BKNG","DE","ELV",
+    "SYK","GILD","LMT","MMC","ADP","VRTX","TJX","MO","MU","SCHW"
   ];
-  const ALL_SYMBOLS = US_LARGE_CAP;
+  const CA_LARGE_CAP = [
+    "RY.TO","TD.TO","ENB.TO","CNQ.TO","BNS.TO","BMO.TO","CP.TO","CNR.TO","TRI.TO","SHOP.TO",
+    "SU.TO","BCE.TO","MFC.TO","TRP.TO","ATD.TO","CM.TO","WCN.TO","NTR.TO","IMO.TO","POW.TO",
+    "L.TO","FTS.TO","DOL.TO","FNV.TO","AEM.TO"
+  ];
+  const FETCH_UNIVERSE = US_LARGE_CAP.concat(CA_LARGE_CAP);
 
-  const PROFILE_CACHE_HOURS = 24;
-  const METRIC_CACHE_HOURS = 12;
   const REFRESH_MINUTES = 3;
+  const CHART_CALL_GAP_MS = 300;
 
   // ---------- State ----------
-  // Default key pre-filled for convenience. Remove DEFAULT_API_KEY (or blank it out)
-  // before publishing to a public repo if you'd rather each visitor paste their own —
-  // anyone can view this in page source once it's live.
-  const DEFAULT_API_KEY = "d9lqcthr01qhk6k5mmjgd9lqcthr01qhk6k5mmk0";
-  let apiKey = localStorage.getItem("ml_finnhub_key") || DEFAULT_API_KEY;
-  let quotes = {};       // symbol -> {c, d, dp, t}
-  let profiles = {};     // symbol -> {name, marketCapitalization}
-  let metrics = {};      // symbol -> {peBasicExclExtraTTM, 5DayPriceReturnDaily, 13WeekPriceReturnDaily, 52WeekPriceReturnDaily, ...}
-  let capFilterMin = 0;  // in billions
+  let data = {}; // sym -> {price, changePct, name, marketCap, pe, volume, r5d, r13w, r52w}
+  let capFilterMinUS = 0;
+  let capFilterMinCA = 0;
+  let capRankFallback = false; // true if the batched quote call failed — no live market cap/volume
   let queueBusy = false;
   let refreshTimer = null;
 
@@ -306,7 +373,6 @@
     if(!queueBusy) runFullLoad();
   });
 
-  // Tabs
   document.querySelectorAll(".tab-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
@@ -316,13 +382,20 @@
     });
   });
 
-  // Cap filter chips
-  document.querySelectorAll("#capFilters .chip").forEach(chip=>{
+  document.querySelectorAll("#capFiltersUS .chip").forEach(chip=>{
     chip.addEventListener("click", ()=>{
-      document.querySelectorAll("#capFilters .chip").forEach(c=>c.classList.remove("active"));
+      document.querySelectorAll("#capFiltersUS .chip").forEach(c=>c.classList.remove("active"));
       chip.classList.add("active");
-      capFilterMin = parseFloat(chip.dataset.cap);
-      renderOverview();
+      capFilterMinUS = parseFloat(chip.dataset.cap);
+      renderUS();
+    });
+  });
+  document.querySelectorAll("#capFiltersCA .chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      document.querySelectorAll("#capFiltersCA .chip").forEach(c=>c.classList.remove("active"));
+      chip.classList.add("active");
+      capFilterMinCA = parseFloat(chip.dataset.cap);
+      renderCA();
     });
   });
 
@@ -332,7 +405,23 @@
     $("statusText").textContent = text;
   }
 
-  // ---------- Rate-limited fetch queue ----------
+  function showDataWarning(msg){
+    let el = $("dataWarning");
+    if(!el){
+      el = document.createElement("div");
+      el.id = "dataWarning";
+      el.style.cssText = "max-width:1180px;margin:16px auto 0;padding:12px 20px;background:var(--hold-bg);color:var(--hold);border-radius:8px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;";
+      document.querySelector("main").prepend(el);
+    }
+    el.textContent = msg;
+    el.style.display = "block";
+  }
+  function hideDataWarning(){
+    const el = $("dataWarning");
+    if(el) el.style.display = "none";
+  }
+
+  // ---------- Rate-limited fetch queue (per-symbol chart calls) ----------
   const queue = [];
   function enqueue(fn){
     return new Promise((resolve,reject)=>{
@@ -343,7 +432,6 @@
   async function processQueue(){
     if(queueBusy) return;
     queueBusy = true;
-    setStatus("busy","Loading…");
     while(queue.length){
       const job = queue.shift();
       try{
@@ -352,160 +440,163 @@
       }catch(e){
         job.reject(e);
       }
-      await sleep(1100); // ~54 calls/min, under Finnhub's free 60/min cap
+      await sleep(CHART_CALL_GAP_MS);
     }
     queueBusy = false;
-    setStatus("live","Live");
-    $("lastUpdated").textContent = "Last updated: " + new Date().toLocaleTimeString();
   }
   function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-  async function finnhubGet(path, params){
-    const url = new URL("https://finnhub.io/api/v1" + path);
-    Object.entries(params||{}).forEach(([k,v])=>url.searchParams.set(k,v));
-    url.searchParams.set("token", apiKey);
-    const res = await fetch(url.toString());
-    if(!res.ok){
-      if(res.status === 401) throw new Error("Invalid API key");
-      if(res.status === 429) throw new Error("Rate limited");
-      throw new Error("Request failed: " + res.status);
+  async function yfFetch(url){
+    try{
+      const res = await fetch(url);
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      return await res.json();
+    }catch(directErr){
+      try{
+        const proxied = "https://corsproxy.io/?url=" + encodeURIComponent(url);
+        const res2 = await fetch(proxied);
+        if(!res2.ok) throw new Error("HTTP "+res2.status);
+        return await res2.json();
+      }catch(proxyErr){
+        throw proxyErr;
+      }
     }
-    return res.json();
   }
 
-  // ---------- Loading ----------
-  function loadProfilesFromCache(){
-    try{
-      const raw = localStorage.getItem("ml_profiles_cache");
-      if(!raw) return;
-      const parsed = JSON.parse(raw);
-      if(Date.now() - parsed.ts < PROFILE_CACHE_HOURS*3600*1000){
-        profiles = parsed.data;
-      }
-    }catch(e){}
+  function computeMomentum(closes){
+    const clean = (closes||[]).filter(c => typeof c === "number");
+    if(clean.length < 10) return null;
+    const last = clean[clean.length-1];
+    const idx5d = clean.length-1-5;
+    const idx13w = clean.length-1-65;
+    const first = clean[0];
+    return {
+      r5d:  idx5d  >= 0 ? (last-clean[idx5d])/clean[idx5d]*100 : null,
+      r13w: idx13w >= 0 ? (last-clean[idx13w])/clean[idx13w]*100 : null,
+      r52w: first ? (last-first)/first*100 : null
+    };
   }
-  function saveProfilesToCache(){
-    localStorage.setItem("ml_profiles_cache", JSON.stringify({ts:Date.now(), data:profiles}));
+
+  async function fetchQuoteBatch(symbols){
+    const url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + symbols.join(",");
+    const json = await yfFetch(url);
+    const results = (json && json.quoteResponse && json.quoteResponse.result) || [];
+    results.forEach(r=>{
+      data[r.symbol] = data[r.symbol] || {};
+      Object.assign(data[r.symbol], {
+        price: r.regularMarketPrice,
+        changePct: r.regularMarketChangePercent,
+        name: r.shortName || r.longName || r.symbol,
+        marketCap: r.marketCap,
+        pe: r.trailingPE,
+        volume: r.regularMarketVolume
+      });
+    });
+    return results.length > 0;
   }
-  function loadMetricsFromCache(){
-    try{
-      const raw = localStorage.getItem("ml_metrics_cache");
-      if(!raw) return;
-      const parsed = JSON.parse(raw);
-      if(Date.now() - parsed.ts < METRIC_CACHE_HOURS*3600*1000){
-        metrics = parsed.data;
-      }
-    }catch(e){}
-  }
-  function saveMetricsToCache(){
-    localStorage.setItem("ml_metrics_cache", JSON.stringify({ts:Date.now(), data:metrics}));
+
+  async function fetchChart(sym){
+    const url = "https://query1.finance.yahoo.com/v8/finance/chart/"+sym+"?range=1y&interval=1d";
+    const json = await yfFetch(url);
+    const result = json && json.chart && json.chart.result && json.chart.result[0];
+    if(!result) return;
+    const meta = result.meta || {};
+    const closes = (result.indicators && result.indicators.quote && result.indicators.quote[0] && result.indicators.quote[0].close) || [];
+    const mom = computeMomentum(closes);
+    data[sym] = data[sym] || {};
+    if(data[sym].price == null && typeof meta.regularMarketPrice === "number"){
+      const prevClose = meta.previousClose != null ? meta.previousClose : meta.chartPreviousClose;
+      data[sym].price = meta.regularMarketPrice;
+      data[sym].changePct = prevClose ? (meta.regularMarketPrice-prevClose)/prevClose*100 : null;
+      data[sym].name = data[sym].name || meta.shortName || sym;
+    }
+    if(mom) Object.assign(data[sym], mom);
   }
 
   async function runFullLoad(){
-    if(!apiKey){ setStatus("idle","No data source configured"); return; }
+    setStatus("busy","Loading quotes…");
 
-    // 1. Quotes for every tracked symbol
+    // Step 1: one batched call covering the whole US + Canada universe
+    let quoteOk = false;
+    try{
+      quoteOk = await fetchQuoteBatch(FETCH_UNIVERSE);
+    }catch(e){ console.warn("Yahoo batch quote failed", e); }
+
+    capRankFallback = !quoteOk;
+    if(!quoteOk){
+      showDataWarning("Live market cap / volume couldn't be fetched from Yahoo in this browser — rankings below fall back to an approximate order instead of a true live sort.");
+    } else {
+      hideDataWarning();
+    }
+    renderTape(); renderUS(); renderCA(); renderMovers(); renderForecast();
+
+    // Step 2: per-symbol chart history — momentum for Forecast + price fallback
     let done = 0;
-    setStatus("busy", "Loading quotes (0/"+ALL_SYMBOLS.length+")");
-    await Promise.all(ALL_SYMBOLS.map(sym => enqueue(async ()=>{
-      try{
-        const q = await finnhubGet("/quote", {symbol: sym});
-        if(q && typeof q.c === "number") quotes[sym] = q;
-      }catch(e){ console.warn("quote failed", sym, e.message); }
+    setStatus("busy", "Loading price history (0/"+FETCH_UNIVERSE.length+")");
+    await Promise.all(FETCH_UNIVERSE.map(sym => enqueue(async ()=>{
+      try{ await fetchChart(sym); }
+      catch(e){ console.warn("chart failed", sym, e.message); }
       done++;
-      setStatus("busy", "Loading quotes ("+done+"/"+ALL_SYMBOLS.length+")");
+      setStatus("busy", "Loading price history ("+done+"/"+FETCH_UNIVERSE.length+")");
       renderTape();
     })));
 
-    // 2. Profiles (for market cap + name) — only for symbols we don't already have cached
-    const capSymbols = US_LARGE_CAP;
-    const needProfiles = capSymbols.filter(s => !profiles[s]);
-    done = 0;
-    if(needProfiles.length){
-      setStatus("busy", "Loading company profiles (0/"+needProfiles.length+")");
-      await Promise.all(needProfiles.map(sym => enqueue(async ()=>{
-        try{
-          const p = await finnhubGet("/stock/profile2", {symbol: sym});
-          if(p) profiles[sym] = p;
-        }catch(e){ console.warn("profile failed", sym, e.message); }
-        done++;
-        setStatus("busy", "Loading company profiles ("+done+"/"+needProfiles.length+")");
-      })));
-      saveProfilesToCache();
-    }
-    renderOverview();
-    renderMovers();
-
-    // 3. Basic financials (P/E ratio + price-return momentum) for the full tracked universe
-    const needMetrics = ALL_SYMBOLS.filter(s => !metrics[s]);
-    done = 0;
-    if(needMetrics.length){
-      setStatus("busy", "Loading fundamentals (0/"+needMetrics.length+")");
-      await Promise.all(needMetrics.map(sym => enqueue(async ()=>{
-        try{
-          const m = await finnhubGet("/stock/metric", {symbol: sym, metric:"all"});
-          if(m && m.metric) metrics[sym] = m.metric;
-        }catch(e){ console.warn("metric failed", sym, e.message); }
-        done++;
-        setStatus("busy", "Loading fundamentals ("+done+"/"+needMetrics.length+")");
-        renderOverview();
-        renderForecast();
-      })));
-      saveMetricsToCache();
-    }
-
+    renderUS(); renderCA(); renderMovers(); renderForecast();
     setStatus("live","Live");
+    $("lastUpdated").textContent = "Last updated: " + new Date().toLocaleTimeString();
   }
 
   // ---------- Formatting ----------
   const fmtPrice = (v) => (v==null || isNaN(v)) ? "—" : "$"+v.toFixed(2);
   const fmtPct = (v) => (v==null || isNaN(v)) ? "—" : (v>=0?"+":"") + v.toFixed(2) + "%";
-  const fmtCap = (m) => { // m is in millions (Finnhub returns marketCapitalization in millions)
-    if(m==null || isNaN(m)) return "—";
-    const b = m/1000;
+  const fmtCap = (v) => {
+    if(v==null || isNaN(v)) return "—";
+    const b = v/1e9;
     if(b >= 1000) return "$"+(b/1000).toFixed(2)+"T";
     return "$"+b.toFixed(1)+"B";
+  };
+  const fmtVolume = (v) => {
+    if(v==null || isNaN(v)) return "—";
+    if(v >= 1e9) return (v/1e9).toFixed(2)+"B";
+    if(v >= 1e6) return (v/1e6).toFixed(1)+"M";
+    if(v >= 1e3) return (v/1e3).toFixed(1)+"K";
+    return String(v);
   };
 
   // ---------- Ticker tape ----------
   function renderTape(){
-    const withData = ALL_SYMBOLS.filter(s=>quotes[s]);
+    const withData = FETCH_UNIVERSE.filter(s=>data[s] && typeof data[s].price === "number");
     if(!withData.length) return;
     const items = withData.map(sym=>{
-      const q = quotes[sym];
-      const up = q.dp >= 0;
-      return `<span class="item"><span class="sym">${sym}</span><span class="${up?'up':'down'}">${fmtPrice(q.c)} ${fmtPct(q.dp)}</span></span>`;
+      const d = data[sym];
+      const up = (d.changePct||0) >= 0;
+      return `<span class="item"><span class="sym">${sym}</span><span class="${up?'up':'down'}">${fmtPrice(d.price)} ${fmtPct(d.changePct)}</span></span>`;
     }).join("");
-    $("tapeContent").innerHTML = items + items; // duplicate for seamless loop
+    $("tapeContent").innerHTML = items + items;
   }
 
-  // ---------- Overview (large cap table) ----------
-  function rankByCap(symbolList, count){
+  // ---------- Ranking helpers ----------
+  function topByCap(symbolList, count, minCapB){
+    if(capRankFallback){
+      return symbolList.filter(s => data[s] && typeof data[s].price === "number").slice(0,count);
+    }
     return symbolList
-      .filter(s => quotes[s] && profiles[s] && profiles[s].marketCapitalization)
-      .filter(s => (profiles[s].marketCapitalization/1000) >= capFilterMin)
-      .sort((a,b) => profiles[b].marketCapitalization - profiles[a].marketCapitalization)
+      .filter(s => data[s] && typeof data[s].marketCap === "number")
+      .filter(s => minCapB == null || (data[s].marketCap/1e9) >= minCapB)
+      .sort((a,b) => data[b].marketCap - data[a].marketCap)
       .slice(0,count);
   }
-  // Forecast always ranks the full universe by cap, independent of the Overview tab's filter chips
-  function topByCap(symbolList, count){
+  function topByVolume(symbolList, count){
+    if(capRankFallback){
+      return [];
+    }
     return symbolList
-      .filter(s => quotes[s] && profiles[s] && profiles[s].marketCapitalization)
-      .sort((a,b) => profiles[b].marketCapitalization - profiles[a].marketCapitalization)
+      .filter(s => data[s] && typeof data[s].volume === "number")
+      .sort((a,b) => data[b].volume - data[a].volume)
       .slice(0,count);
   }
 
-  function renderOverview(){
-    renderCapTable("usCapTable", rankByCap(US_LARGE_CAP, 10));
-  }
-
-  function peValue(sym){
-    const m = metrics[sym];
-    if(!m) return null;
-    const v = m.peBasicExclExtraTTM ?? m.peExclExtraTTM ?? m.peNormalizedAnnual ?? m.peTTM ?? null;
-    return (typeof v === "number") ? v : null;
-  }
-
+  // ---------- Shared table renderers ----------
   function renderCapTable(tbodyId, symbols){
     const tbody = $(tbodyId);
     if(!symbols.length){
@@ -513,25 +604,55 @@
       return;
     }
     tbody.innerHTML = symbols.map((sym,i)=>{
-      const q = quotes[sym], p = profiles[sym];
-      const up = q.dp >= 0;
-      const pe = peValue(sym);
+      const d = data[sym];
+      const up = (d.changePct||0) >= 0;
       return `<tr>
         <td class="rank">${i+1}</td>
         <td class="sym">${sym}</td>
-        <td class="name">${p.name || sym}</td>
-        <td class="num">${fmtPrice(q.c)}</td>
-        <td class="num ${up?'chg-up':'chg-down'}">${fmtPct(q.dp)}</td>
-        <td class="num">${fmtCap(p.marketCapitalization)}</td>
-        <td class="num">${pe ? pe.toFixed(1) : "—"}</td>
+        <td class="name">${d.name || sym}</td>
+        <td class="num">${fmtPrice(d.price)}</td>
+        <td class="num ${up?'chg-up':'chg-down'}">${fmtPct(d.changePct)}</td>
+        <td class="num">${fmtCap(d.marketCap)}</td>
+        <td class="num">${typeof d.pe==="number" ? d.pe.toFixed(1) : "—"}</td>
+      </tr>`;
+    }).join("");
+  }
+  function renderActiveTable(tbodyId, symbols){
+    const tbody = $(tbodyId);
+    if(!symbols.length){
+      tbody.innerHTML = `<tr class="placeholder-row"><td colspan="6">No volume data yet</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = symbols.map((sym,i)=>{
+      const d = data[sym];
+      const up = (d.changePct||0) >= 0;
+      return `<tr>
+        <td class="rank">${i+1}</td>
+        <td class="sym">${sym}</td>
+        <td class="name">${d.name || sym}</td>
+        <td class="num">${fmtPrice(d.price)}</td>
+        <td class="num ${up?'chg-up':'chg-down'}">${fmtPct(d.changePct)}</td>
+        <td class="num">${fmtVolume(d.volume)}</td>
       </tr>`;
     }).join("");
   }
 
-  // ---------- Movers ----------
+  // ---------- Main US Players ----------
+  function renderUS(){
+    renderCapTable("usCapTable", topByCap(US_LARGE_CAP, 20, capFilterMinUS));
+    renderActiveTable("usActiveTable", topByVolume(US_LARGE_CAP, 20));
+  }
+
+  // ---------- Main Canadian Players ----------
+  function renderCA(){
+    renderCapTable("caCapTable", topByCap(CA_LARGE_CAP, 20, capFilterMinCA));
+    renderActiveTable("caActiveTable", topByVolume(CA_LARGE_CAP, 20));
+  }
+
+  // ---------- Movers (US universe) ----------
   function renderMovers(){
-    const withData = ALL_SYMBOLS.filter(s=>quotes[s] && typeof quotes[s].dp === "number");
-    const sorted = [...withData].sort((a,b)=> quotes[b].dp - quotes[a].dp);
+    const withData = US_LARGE_CAP.filter(s=>data[s] && typeof data[s].changePct === "number");
+    const sorted = [...withData].sort((a,b)=> data[b].changePct - data[a].changePct);
     const winners = sorted.slice(0,10);
     const losers = sorted.slice(-10).reverse();
     renderMoverTable("winnersTable", winners);
@@ -544,15 +665,14 @@
       return;
     }
     tbody.innerHTML = symbols.map((sym,i)=>{
-      const q = quotes[sym];
-      const p = profiles[sym];
-      const up = q.dp >= 0;
+      const d = data[sym];
+      const up = (d.changePct||0) >= 0;
       return `<tr>
         <td class="rank">${i+1}</td>
         <td class="sym">${sym}</td>
-        <td class="name">${p ? (p.name||sym) : sym}</td>
-        <td class="num">${fmtPrice(q.c)}</td>
-        <td class="num ${up?'chg-up':'chg-down'}">${fmtPct(q.dp)}</td>
+        <td class="name">${d.name || sym}</td>
+        <td class="num">${fmtPrice(d.price)}</td>
+        <td class="num ${up?'chg-up':'chg-down'}">${fmtPct(d.changePct)}</td>
       </tr>`;
     }).join("");
   }
@@ -562,26 +682,21 @@
   // 1-year (52-week) price returns into a single drift, dampen it so a single hot
   // week can't run away with the number, then cap it to a sane range. This is a
   // rule-based calculation on real price history — not a prediction and not advice.
-  function momentumForecast(sym, currentPrice){
-    const m = metrics[sym];
-    if(!m || !currentPrice) return null;
-    const r5d  = m["5DayPriceReturnDaily"];
-    const r13w = m["13WeekPriceReturnDaily"];
-    const r52w = m["52WeekPriceReturnDaily"];
+  function momentumForecast(sym){
+    const d = data[sym];
+    if(!d || typeof d.price !== "number") return null;
+    const r5d = d.r5d, r13w = d.r13w, r52w = d.r52w;
     if([r5d,r13w,r52w].every(v => typeof v !== "number")) return null;
 
     const w5d = typeof r5d  === "number" ? r5d  : 0;
     const w13 = typeof r13w === "number" ? r13w : 0;
     const w52 = typeof r52w === "number" ? r52w : 0;
 
-    // weighted blend: recent week matters, but the year-long trend carries the most weight
     const blended = (0.15*w5d + 0.35*w13 + 0.50*w52);
-    // dampen — only assume a fraction of past trend continues forward
     let drift = blended * 0.35;
-    // cap to keep the target price plausible
     drift = Math.max(-25, Math.min(25, drift));
 
-    const target = currentPrice * (1 + drift/100);
+    const target = d.price * (1 + drift/100);
 
     let label, cls;
     if(drift >= 8){ label = "Strong Buy"; cls = "strongbuy"; }
@@ -591,54 +706,72 @@
     return {target, drift, label, cls, r5d, r13w, r52w};
   }
 
+  function forecastCardHtml(sym, rankLabel){
+    const d = data[sym];
+    const fc = momentumForecast(sym);
+    const statChip = (label, v) => `<div class="mstat">${label} <b>${typeof v==="number" ? fmtPct(v) : "—"}</b></div>`;
+    return `<div class="fcard">
+      <div class="row1">
+        <div>
+          <div class="sym">${rankLabel ? rankLabel+" · " : ""}${sym}</div>
+          <div class="company">${d.name || sym}</div>
+        </div>
+        <span class="badge ${fc ? fc.cls : ''}">${fc ? fc.label : "—"}</span>
+      </div>
+      <div class="prices">
+        <div>
+          <div class="label">Current</div>
+          <div class="p">${fmtPrice(d.price)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="label">Forecast target</div>
+          <div class="p">${fc ? fmtPrice(fc.target) : "—"}</div>
+        </div>
+      </div>
+      ${fc ? `<div class="upside ${fc.drift>=0?'chg-up':'chg-down'}">${fc.drift>=0?'+':''}${fc.drift.toFixed(1)}% modeled move</div>` : ""}
+      ${fc ? `<div class="mstats">${statChip("1W", fc.r5d)}${statChip("13W", fc.r13w)}${statChip("52W", fc.r52w)}</div>` : ""}
+    </div>`;
+  }
+
   function renderForecast(){
     const grid = $("forecastGrid");
-    const rows = topByCap(US_LARGE_CAP, 20);
+    const rows = topByCap(US_LARGE_CAP, 50, null);
     if(!rows.length){
       grid.innerHTML = `<div class="placeholder-row" style="grid-column:1/-1;"><div>No data yet</div></div>`;
       return;
     }
-    grid.innerHTML = rows.map((sym,i)=>{
-      const q = quotes[sym];
-      const p = profiles[sym];
-      const fc = momentumForecast(sym, q.c);
-
-      const statChip = (label, v) => `<div class="mstat">${label} <b>${typeof v==="number" ? fmtPct(v) : "—"}</b></div>`;
-
-      return `<div class="fcard">
-        <div class="row1">
-          <div>
-            <div class="sym">#${i+1} · ${sym}</div>
-            <div class="company">${p ? (p.name||sym) : sym}</div>
-          </div>
-          <span class="badge ${fc ? fc.cls : ''}">${fc ? fc.label : "—"}</span>
-        </div>
-        <div class="prices">
-          <div>
-            <div class="label">Current</div>
-            <div class="p">${fmtPrice(q.c)}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="label">Forecast target</div>
-            <div class="p">${fc ? fmtPrice(fc.target) : "—"}</div>
-          </div>
-        </div>
-        ${fc ? `<div class="upside ${fc.drift>=0?'chg-up':'chg-down'}">${fc.drift>=0?'+':''}${fc.drift.toFixed(1)}% modeled move</div>` : ""}
-        ${fc ? `<div class="mstats">${statChip("1W", fc.r5d)}${statChip("13W", fc.r13w)}${statChip("52W", fc.r52w)}</div>` : ""}
-      </div>`;
-    }).join("");
+    grid.innerHTML = rows.map((sym,i)=> forecastCardHtml(sym, "#"+(i+1))).join("");
   }
+
+  // ---------- Ticker search ----------
+  async function runSearch(){
+    const raw = $("tickerSearchInput").value.trim().toUpperCase();
+    if(!raw) return;
+    $("searchResultWrap").style.display = "block";
+    $("searchResultWrap").innerHTML = `<div class="fcard" style="max-width:340px;">Searching ${raw}…</div>`;
+    try{
+      const ok = await fetchQuoteBatch([raw]);
+      if(!ok || !data[raw] || typeof data[raw].price !== "number"){
+        throw new Error("not found");
+      }
+      try{ await fetchChart(raw); }catch(e){ /* momentum just won't be available */ }
+      $("searchResultWrap").innerHTML = forecastCardHtml(raw, null) +
+        `<button class="ghost" id="clearSearchBtn" style="margin-top:10px;font-size:11px;padding:6px 12px;">Clear</button>`;
+      $("clearSearchBtn").addEventListener("click", ()=>{
+        $("searchResultWrap").style.display = "none";
+        $("searchResultWrap").innerHTML = "";
+        $("tickerSearchInput").value = "";
+      });
+    }catch(e){
+      $("searchResultWrap").innerHTML = `<div class="fcard" style="max-width:400px;color:var(--loss);">Couldn't find data for "${raw}". Use the exact Yahoo ticker format — e.g. AAPL for US stocks, SHOP.TO for Toronto-listed stocks.</div>`;
+    }
+  }
+  $("tickerSearchBtn").addEventListener("click", runSearch);
+  $("tickerSearchInput").addEventListener("keydown", (e)=>{ if(e.key==="Enter") runSearch(); });
 
   // ---------- Boot ----------
-  if(apiKey){
-    loadProfilesFromCache();
-    loadMetricsFromCache();
-    runFullLoad();
-  } else {
-    setStatus("idle","No data source configured");
-  }
-
-  refreshTimer = setInterval(()=>{ if(apiKey && !queueBusy) runFullLoad(); }, REFRESH_MINUTES*60*1000);
+  runFullLoad();
+  refreshTimer = setInterval(()=>{ if(!queueBusy) runFullLoad(); }, REFRESH_MINUTES*60*1000);
 
 })();
 </script>
