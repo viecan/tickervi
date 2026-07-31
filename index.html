@@ -111,6 +111,28 @@
   button.ghost{background:transparent;color:var(--brand);border:1px solid var(--brand);}
   button.ghost:hover{background:var(--brand);color:#fff;}
   button:disabled{opacity:.5;cursor:not-allowed;}
+  /* ---------- Jump-to-ticker search ---------- */
+  .jump-search{display:flex;align-items:center;gap:8px;margin:24px 0 0;}
+  .jump-search input{
+    width:220px;
+    padding:8px 12px;
+    border:1px solid var(--rule);
+    border-radius:6px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    background:var(--paper-raised);
+    color:var(--ink);
+  }
+  .jump-search input:focus{outline:2px solid var(--brand);outline-offset:-1px;}
+  .jump-search button{padding:8px 14px;font-size:12px;}
+  .jump-search #jumpMsg{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);}
+  @keyframes jump-flash{
+    0%{background:var(--hold-bg);}
+    100%{background:transparent;}
+  }
+  tr.jump-highlight{animation:jump-flash 1.8s ease-out;}
+  .fcard.jump-highlight{animation:jump-flash 1.8s ease-out;border-color:var(--hold);}
+
   /* ---------- Tabs ---------- */
   .tabs{display:flex;gap:6px;margin:32px 0 18px;border-bottom:1px solid var(--rule);}
   .tab-btn{
@@ -156,7 +178,7 @@
   }
   table.ledger td{padding:11px 12px;border-bottom:1px solid var(--rule);font-size:13.5px;}
   table.ledger tr:last-child td{border-bottom:none;}
-  table.ledger td.num{font-family:'IBM Plex Mono',monospace;text-align:right;}
+  table.ledger td.num{font-family:'IBM Plex Mono',monospace;text-align:left;}
   table.ledger td.rank{font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);width:26px;}
   table.ledger td.sym{font-family:'IBM Plex Mono',monospace;font-weight:600;}
   table.ledger td.name{color:var(--ink-soft);font-size:12.5px;}
@@ -227,15 +249,21 @@
 
 <main>
 
+  <div class="jump-search">
+    <input type="text" id="jumpInput" placeholder="Jump to ticker — e.g. AAPL" autocomplete="off">
+    <button id="jumpBtn" class="ghost">Go</button>
+    <span id="jumpMsg"></span>
+  </div>
+
   <div class="tabs">
-    <button class="tab-btn active" data-tab="us">Main US Players</button>
+    <button class="tab-btn active" data-tab="us">Top US Stocks</button>
     <button class="tab-btn" data-tab="movers">Daily Movers</button>
     <button class="tab-btn" data-tab="forecast">Forecast</button>
   </div>
 
   <!-- MAIN US PLAYERS -->
   <div class="tab-panel active" id="panel-us">
-    <div class="section-head"><h3>Top 20 · Main US Players</h3><span class="sub">ranked live by market cap</span></div>
+    <div class="section-head"><h3>Top 50 · Top US Stocks</h3><span class="sub">ranked live by market cap</span></div>
     <div class="table-scroll"><table class="ledger"><thead><tr><th>#</th><th>Company</th><th class="num">Price</th><th class="num">Daily % Chg</th><th class="num">Volume</th><th class="num">Market Cap</th><th class="num">P/E</th><th>AI Signal</th></tr></thead>
     <tbody id="usCapTable"><tr class="placeholder-row"><td colspan="8">Loading data…</td></tr></tbody></table></div>
   </div>
@@ -321,6 +349,37 @@
   $("refreshBtn").addEventListener("click", () => {
     if(!queueBusy) runFullLoad();
   });
+
+  function jumpToTicker(){
+    const raw = $("jumpInput").value.trim().toUpperCase();
+    const msg = $("jumpMsg");
+    if(!raw) return;
+    if(!quotes[raw]){
+      msg.textContent = `"${raw}" isn't in the tracked universe.`;
+      return;
+    }
+    let target = document.querySelector(`#usCapTable tr[data-ticker="${raw}"]`);
+    let tabId = "us";
+    if(!target){
+      target = document.querySelector(`#forecastGrid [data-ticker="${raw}"]`);
+      tabId = "forecast";
+    }
+    if(!target){
+      msg.textContent = `${raw} is tracked but not in the currently displayed lists.`;
+      return;
+    }
+    msg.textContent = "";
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+    document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add("active");
+    $("panel-"+tabId).classList.add("active");
+    target.scrollIntoView({behavior:"smooth", block:"center"});
+    target.classList.remove("jump-highlight");
+    void target.offsetWidth; // restart animation if re-triggered
+    target.classList.add("jump-highlight");
+  }
+  $("jumpBtn").addEventListener("click", jumpToTicker);
+  $("jumpInput").addEventListener("keydown", (e)=>{ if(e.key==="Enter") jumpToTicker(); });
 
   document.querySelectorAll(".tab-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
@@ -533,10 +592,10 @@
     return {target, drift, label, cls, r5d, r13w, r52w};
   }
 
-  // ---------- Main US Players ----------
+  // ---------- Top US Stocks ----------
   function renderUS(){
     const tbody = $("usCapTable");
-    const symbols = topByCap(US_LARGE_CAP, 20);
+    const symbols = topByCap(US_LARGE_CAP, 50);
     if(!symbols.length){
       tbody.innerHTML = `<tr class="placeholder-row"><td colspan="8">No data yet — still loading</td></tr>`;
       return;
@@ -547,7 +606,7 @@
       const pe = peValue(sym);
       const avgVol = avgVolumeValue(sym);
       const fc = momentumForecast(sym, q.c);
-      return `<tr>
+      return `<tr data-ticker="${sym}">
         <td class="rank">${i+1}</td>
         <td class="name"><span class="sym">${sym}</span>${p.name || sym}</td>
         <td class="num">${fmtPrice(q.c)}</td>
@@ -603,10 +662,10 @@
       const fc = momentumForecast(sym, q.c);
       const statChip = (label, v) => `<div class="mstat">${label} <b>${typeof v==="number" ? fmtPct(v) : "—"}</b></div>`;
 
-      return `<div class="fcard">
+      return `<div class="fcard" data-ticker="${sym}">
         <div class="row1">
           <div>
-            <div class="sym">#${i+1} · ${sym}</div>
+            <div class="sym">${sym}</div>
             <div class="company">${p ? (p.name||sym) : sym}</div>
           </div>
           <span class="badge ${fc ? fc.cls : ''}">${fc ? fc.label : "—"}</span>
